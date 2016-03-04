@@ -1,0 +1,15 @@
+{
+  "name": "cobber",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Gow Traithavil",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "node-uuid": "^1.4.7",
+    "websocket": "^1.0.22"
+  }
+}
