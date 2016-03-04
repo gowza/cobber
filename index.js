@@ -5,6 +5,7 @@ const http = require('http');
 const uuid = require('node-uuid');
 
 let connections = [];
+let tasks = {};
 
 const server = http.createServer((request, response) => {
   console.log(`${new Date()} Received request for ${request.url}`);
@@ -35,18 +36,46 @@ wsServer.on('request', (request) => {
     message: connection.id
   });
 
+  send({
+    type: 'tasks',
+    message: tasks
+  })
+
   console.log(`${new Date()} Connection accepted.`);
   console.log(connection.remoteAddress);
 
   connection.on('message', (message) => {
     if (message.type === 'utf8') {
+        let data;
+
         console.log(`${new Date()} ${connection.id} ${message.utf8Data}`);
 
-        broadcast({
-          type: 'message',
-          message: message.utf8Data,
-          sender: connection.id
-        });
+        try {
+          data = JSON.parse(message.utf8Data);
+        } catch (e) {
+          console.log(`ERROR: Invalid message from client.`);
+          return;
+        }
+
+        if (/^(add|remove)/.test(data.type)) {
+          let taskId = data.id;
+
+          switch(data.type) {
+            case 'add':
+              taskId = uuid.v4();
+              tasks[taskId] = data.message;
+              break;
+            case 'remove':
+              delete task[taskId];
+          }
+
+          broadcast({
+            type: data.type,
+            id: taskId,
+            message: data.message,
+            sender: connection.id
+          });
+        }
     }
   });
 
@@ -59,7 +88,7 @@ wsServer.on('request', (request) => {
 
     console.log(Object.keys(connections));
     console.log(`${new Date()} Peer ${connection.remoteAddress} disconnected.`);
-  })
+  });
 });
 
 setInterval(() => {
