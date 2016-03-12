@@ -1,13 +1,13 @@
 {
   "name": "cobber",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Gow Traithavil",
-  "license": "UNLICENSED",
+  "author": "Gow Traithavil <gow.traithavil@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "node-uuid": "^1.4.7",
     "websocket": "^1.0.22"
