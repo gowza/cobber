@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Page Title</title>
+  <title>Cobber</title>
+
+  <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 <body>
   <h1>WebSocket Client</h1>
@@ -15,11 +17,11 @@
   <p>
     <form id="commandForm">
       <input type='text' name="command" />
-      <button type='button' onclick="sendCommand(this.form.firstElementChild.value)">Submit</button>
+      <button type='submit'>Submit</button>
     </form>
   </p>
 
-  <ul id="messageList">
+  <ul id="messageList" class="task-list">
   </ul>
 
   <script type="text/javascript" src="client.js"></script>
