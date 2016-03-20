@@ -130,24 +130,21 @@ class Task {
   }
 
   update(task) {
-    switch (task.lastAction) {
-      case 'add':
+    console.log(task.status);
+    switch (task.status) {
+      case 'available':
         this.description.textContent = 'Added by ' + task.modifiedBy;
         this.item.className = 'available';
         break;
-      case 'take':
+      case 'taken':
         this.description.textContent = 'Taken by ' + task.modifiedBy;
         this.item.className = socket.ws.connectionId === task.modifiedBy ? 'taken-by-me' : 'taken';
         break;
-      case 'release':
-        this.description.textContent = 'Taken by ' + task.modifiedBy;
-        this.item.className = 'available';
-        break;
-      case 'complete':
+      case 'completed':
         this.description.textContent = 'Completed by ' + task.modifiedBy;
         this.item.className = 'completed';
         break;
-      case 'archive':
+      case 'archived':
         this.description.textContent = 'Archived';
         this.item.className = 'archived';
         break;

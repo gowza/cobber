@@ -2,44 +2,51 @@
 
 const uuid = require('node-uuid');
 
+/*
+ * Status: available ->
+ */
 class Task {
   constructor(name, userId) {
     this.id = uuid.v4();
     this.name = name;
 
-    this.type = 'available';
-    this.lastAction = 'add';
-    this.modifiedBy = userId;
+    this.status = 'available';
     this.modifiedBy = userId;
   }
 
-  takeBy(userId) {
-    if (this.type !== 'available') {
+  take(userId) {
+    if (this.status !== 'available') {
       throw 'taskNotAvailable';
     }
 
-    this.type = 'taken';
-    this.lastAction = 'take';
+    this.status = 'taken';
     this.modifiedBy = userId;
   }
 
-  releaseBy(userId) {
-    if (this.modifiedBy !== userId || this.type !== 'taken') {
+  release(userId) {
+    if (this.modifiedBy !== userId || this.status !== 'taken') {
       throw 'taskNotTakeByUser';
     }
 
-    this.type = 'available';
-    this.lastAction = 'release';
+    this.status = 'available';
     this.modifiedBy = userId;
   }
 
-  completeBy(userId) {
-    if (this.modifiedBy !== userId || this.type !== 'taken') {
+  complete(userId) {
+    if (this.modifiedBy !== userId || this.status !== 'taken') {
       throw 'taskNotTakeByUser';
     }
 
-    this.type = 'completed';
-    this.lastAction = 'complete';
+    this.status = 'completed';
+    this.modifiedBy = userId;
+  }
+
+  archive(userId) {
+    if (this.status !== 'completed') {
+      throw 'taskNotCompleted'
+    }
+
+    this.status = 'archived';
     this.modifiedBy = userId;
   }
 }

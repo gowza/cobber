@@ -4,9 +4,10 @@ const WebSocketServer = require('websocket').server;
 const http = require('http');
 const uuid = require('node-uuid');
 const Task = require('./Class/Task');
+const TaskList = require('./Class/TaskList');
 
 let connections = [];
-let tasks = {};
+let tasks = new TaskList();
 
 const server = http.createServer((req, res) => {
   console.log(`${new Date()} Received request for ${req.url}`);
@@ -32,6 +33,7 @@ wsServer.on('request', (request) => {
   }
 
   connections[connection.id] = connection;
+
   send({
     type: 'connectionId',
     message: connection.id
@@ -39,61 +41,65 @@ wsServer.on('request', (request) => {
 
   send({
     type: 'tasks',
-    message: tasks
+    message: tasks.allAsObject()
   });
 
   console.log(`${new Date()} Connection accepted.`);
   console.log(connection.remoteAddress);
 
   connection.on('message', (message) => {
-    if (message.type === 'utf8') {
-      let data;
+    if (message.type !== 'utf8') {
+      return;
+    }
 
-      console.log(`${new Date()} ${connection.id} ${message.utf8Data}`);
+    let data;
+
+    console.log(`${new Date()} ${connection.id} ${message.utf8Data}`);
+
+    try {
+      data = JSON.parse(message.utf8Data);
+    } catch (e) {
+      console.log(`ERROR: Invalid message from client.`);
+      return;
+    }
+
+    if (/^(add|take|release|complete)/.test(data.type)) {
+      let task;
+      let type = 'update';
 
       try {
-        data = JSON.parse(message.utf8Data);
-      } catch (e) {
-        console.log(`ERROR: Invalid message from client.`);
-        return;
-      }
-
-      if (/^(add|take|release|complete)/.test(data.type)) {
-        let task;
-        let type = 'update';
-
-        try {
-          switch(data.type) {
-            case 'add':
-              task = new Task(data.value, connection.id);
-              tasks[task.id] = task;
-              type = 'add';
-              break;
-            case 'take':
-              task = tasks[data.value];
-              task.takeBy(connection.id);
-              break;
-            case 'release':
-              task = tasks[data.value];
-              task.releaseBy(connection.id);
-              break;
-            case 'complete':
-              task = tasks[data.value];
-              task.completeBy(connection.id);
-              break;
-          }
-
-          broadcast({
-            type: type,
-            id: task.id,
-            task: task
-          });
-        } catch (e) {
-          send({
-            type: 'error',
-            message: e
-          });
+        switch (data.type) {
+          case 'add':
+            task = new Task(data.value, connection.id);
+            tasks.add(task);
+            type = 'add';
+            break;
+          case 'take':
+            task = tasks.find(data.value);
+            task.take(connection.id);
+            break;
+          case 'release':
+            task = tasks.find(data.value);
+            task.release(connection.id);
+            break;
+          case 'complete':
+            task = tasks.find(data.value);
+            task.complete(connection.id);
+            break;
         }
+
+        broadcast({
+          type: type,
+          id: task.id,
+          task: task
+        });
+      } catch (e) {
+        console.log(e);
+
+        send({
+          type: 'error',
+          message: JSON.stringify(e)
+        });
       }
     }
   });
